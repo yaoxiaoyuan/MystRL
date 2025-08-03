@@ -15,6 +15,7 @@ pip install -r requirements.txt
 Snake is a fundamentally simple yet thrilling challenge where players guide a continuously moving line across a grid. The objective is to navigate the snake, using directional controls to collect food items like pellets or apples, each consumed piece causing the snake to grow longer. Success requires quick reflexes and careful planning, as the primary danger comes from the snake itself: colliding with any part of its own ever-lengthening body instantly ends the game. This creates an escalating challenge, where the very act of growing and progressing makes maneuvering in the confined space increasingly perilous.
 
 The reward function can be written as:
+
 $$
 r(s,a) = 
 \begin{cases}
@@ -23,6 +24,7 @@ r(s,a) =
   0 & \text{otherwise} \\
 \end{cases}
 $$
+
 The **moving average reward curve (over a sliding window of 100 games)** during training is visualized as follows:
 
 ![snake_score](pic/snake_score.png)
@@ -46,6 +48,7 @@ python game_snake.py --mode train --device cuda --task_name snake --save_path mo
 2048 is a deceptively simple yet compelling puzzle game played on a 4x4 grid. Players slide numbered tiles in any of the four directions, causing matching tiles to merge into a new tile with their combined value. The core objective is to strategically combine doubles to create ever-larger numbers, ultimately aiming to form the elusive 2048 tile before the grid becomes too crowded. Each move introduces a new low-value tile (usually a '2' or '4'), constantly challenging players to balance their progress against the increasingly filled board.
 
 The reward function can be written as:
+
 $$
 r(s,a) = 
 \begin{cases}
@@ -53,6 +56,7 @@ r(s,a) =
   \alpha*\sum_{x\in\text{merged tiles}}\log_2(x) + \beta*N_{zeros}& \text{otherwise} \\
 \end{cases}
 $$
+
 The **moving average reward curve (over a sliding window of 100 games)** during training is visualized as follows:
 
 ![2048_score](pic/2048_score.png)
@@ -81,6 +85,7 @@ Most literature on Tetris AI simplifies the piece placement process to address t
 On the contrary, this project enforces AI mastery of precise piece manipulation. We implement Potential-based Reward Shaping, which strategically alleviates sparse rewards by delivering immediate feedback. 
 
 The reward function can be written as:
+
 $$
 r(s,a,s') = \phi(s')-\phi(s)+r(s,a)
 $$
