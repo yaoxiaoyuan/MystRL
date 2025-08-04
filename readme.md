@@ -8,7 +8,25 @@ MystRL is a simple Python implementation of reinforcement learning from scratch.
 
 pip install -r requirements.txt
 
+### Contact
+
+Email address: yaoxiaoyuan1990@gmail.com.  Or you can add my WeChat:
+
+ ![wechat](pic/wechat.jpg)
+
+### Cite
+
+```
+@misc{mimix,
+  title={MystRL},
+  author={Xiaoyuan Yao},
+  year={2025}
+}
+```
+
 ### DQN
+
+All the models can be download at https://drive.google.com/drive/folders/1tUH4VPNMT5zzQHpRoLYDDrHnRpOq45xj?usp=drive_link
 
 #### Snake 
 
@@ -110,19 +128,19 @@ The **moving average reward curve (over a sliding window of 100 games)** during 
 
 ![tetris_score](pic/tetris_score.png)
 
-After training, the test results are as follows (conducted on 500 games):
+After training, the test results are as follows (conducted on 1000 games):
 
 | Total Games | Average Score | Average Clear Lines |
 | ----------- | ------------- | ------------------- |
-| 500         | 17802         | 162.85              |
+| 1000        | 34589         | 316.23              |
 
 ##### How To Test
 
-python game_tetris.py --mode test --min_eps -1 --model_path model/tetris/episode-45000/model_weights --render_mode gui --speed 30
+python game_tetris.py --mode test --min_eps -1 --model_path model/tetris/episode-49000/model_weights --render_mode gui --speed 30
 
 ##### How To Train 
 
-python game_tetris.py --mode train --device cuda --task_name tetris --save_path model/tetris --min_eps 0.0005 --lr 2e-4 --batch_size 32 --save_every_episodes 1000 --decay_rate 200000 --min_train_buffer_size 100000 --buffer_size 20000000 --target_update_frequency 10000 --lr_scheduler cosine --total_decay_episodes 20000 --min_lr 1e-5 --n_episode 45000
+python game_tetris.py --mode train --device cuda --task_name tetris --save_path model/tetris --min_eps 0.0005 --lr 2e-4 --batch_size 32 --save_every_episodes 1000 --decay_rate 200000 --min_train_buffer_size 100000 --buffer_size 20000000 --target_update_frequency 10000 --lr_scheduler cosine --total_decay_episodes 20000 --min_lr 1e-5 --n_episode 50000
 
 #### **DQN Training Tips** 
 
