@@ -81,9 +81,9 @@ The **moving average reward curve (over a sliding window of 100 games)** during 
 
 After training, the test results are as follows (conducted on 500 games):
 
-| Total Games | Average Score | Success Rate(2048 Rate) |
-| ----------- | ------------- | ----------------------- |
-| 500         | 29630         | 0.63                    |
+| Total Games | Average Score | Success Rate(>=2048 Rate) |
+| ----------- | ------------- | ------------------------- |
+| 500         | 29630         | 0.63                      |
 
 | 4096 Rate | 2048 Rate | 1024 Rate | 512 Rate | 256 Rate | 128 Rate |
 | --------- | --------- | --------- | -------- | -------- | -------- |
