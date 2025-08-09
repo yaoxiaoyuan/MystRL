@@ -25,11 +25,24 @@ import torch.multiprocessing as mp
 from mcts import MCTS
 from resnet import ResNet
 from logger import logger, add_file_handlers, print_formated_args
+from board_game import GameState
 
 mp.set_start_method('spawn', force=True)
 
 def self_play(task_id, env, model, args):
     """
+    Executes self-play games using Monte Carlo Tree Search (MCTS) for policy improvement.
+    Generates training data (state, player, policy, value) through parallel game simulations.
+    
+    Parameters:
+    task_id (int)     : Identifier for logging and tracking individual tasks
+    env (object)      : Game environment defining rules and valid moves
+    model (nn.Module) : Neural network for predicting policies and values
+    args (object)     : Configuration parameters container
+    
+    Returns:
+    list : Tuples of (game_state, active_player, policy_vector, outcome)
+           - outcome: +1 for win, -1 for loss from player's perspective
     """ 
     play_data = [
             []
@@ -87,7 +100,6 @@ def self_play(task_id, env, model, args):
     for i in range(args.n_parallel_games):
         for j in range(len(play_data[i])):
             state, player, pp = play_data[i][j]
-            z = (play_data[i][j][1] * mcts.root_list[i].winner)
             z = (player * mcts.root_list[i].winner)
             play_data_with_result.append((state, player, pp, z))
 
@@ -97,6 +109,24 @@ def self_play(task_id, env, model, args):
 
 def train_az(env_cls, args):
     """
+    Train an AlphaZero-style model using self-play data and iterative updates.
+
+    Parameters:
+    env_cls (callable): Environment class constructor. Must accept `args` parameter
+        and provide properties: `input_shape`, `n_actions`, and method `convert_to_model_inputs`
+    args (argparse.Namespace): Configuration object containing:
+        - device (torch.device): Computation device (CPU/GPU)
+        - task_name (str): Identifier for logging
+        - n_filters (int): Convolutional filter count
+        - n_res_blocks (int): Number of residual blocks
+        - hidden_size (int): Neural network hidden layer size
+        - n_total_games (int): Total games to generate
+        - n_parallel_games (int): Games per parallel process
+        - n_processes (int): Number of worker processes
+        - train_epochs (int): Training epochs per iteration
+        - batch_size (int): Minibatch size for SGD
+        - lr (float): Adam optimizer learning rate
+        - save_path (str): Directory for model checkpoints
     """
     logger_path = os.path.join("logger", f"{args.task_name}.log")
     add_file_handlers(logger_path)
@@ -168,65 +198,132 @@ def train_az(env_cls, args):
         torch.save(model.state_dict(), save_path)
         logger.info("save model done.")
 
+def print_node_stats(node):
+    """
+    Prints statistical information of a Monte Carlo Tree Search (MCTS) node.
+    
+    Displays key node attributes including:
+    - Prior probability from the neural network policy
+    - Valid legal moves available at this game state
+    - Value estimates (Q-values) for child nodes
+    - Visit counts for child nodes during simulations
+    
+    Args:
+        node (MCTSNode): Node object from the MCTS tree structure
+    """
+    print(f"prior:{node.prior}")
+    print(f"valid_moves:{node.valid_moves}")
+    print(f"values:{node.children_value}")
+    print(f"visits:{node.children_visits}")
 
 def test_play(env_cls, args):
     """
+    Executes interactive gameplay test loop with human-AI interaction.
+    
+    Initializes game environment and loads pre-trained ResNet model for MCTS.
+    Supports two modes:
+    - GUI mode with PyGame rendering
+    - Console mode without visualization
+    
+    Args:
+        env_cls (class): Environment class constructor
+        args (Namespace): Configuration parameters containing:
+            render_mode (str): "gui" or "console" display mode
+            device (torch.device): Computation device (CPU/GPU)
+            model_path (str): Path to trained model weights
+            n_simulations (int): MCTS simulation count per move
+            c_puct (float): Exploration constant for UCT formula
     """
     env = env_cls(args)
-
+    
+    if args.render_mode == "gui":
+        env.init_pygame()
+    
     model = ResNet(
                  input_shape=env.input_shape,
                  n_filters=args.n_filters,
                  n_res_blocks=args.n_res_blocks,
                  hidden_size=args.hidden_size,
                  n_class=env.n_actions
-            ).to(args.device)    
+            ).to(args.device)
     model.load_state_dict(torch.load(args.model_path, map_location="cpu"))
 
-    human = int(input("Play First Or Second(1: First, -1:Second):"))
-    state = env.reset()
-    player = 1
-    winner = 0
-    done = False 
-    mcts = MCTS(env, 1, args.c_puct, model, args.n_simulations, args.device)
-    while True:
-        env.render(state, player, winner, done)
-        mcts.simulate()
-        
-        #print(f"state:\n{mcts.root_list[0].state}")
-        print(f"prior:{mcts.root_list[0].prior}")        
-        print(f"valid_moves:{mcts.root_list[0].valid_moves}")
-        print(f"values:{mcts.root_list[0].children_value}")
-        print(f"visits:{mcts.root_list[0].children_visits}")
+    running = True
+    game_state = GameState(env.reset(), args.render_mode)
+    while running:
 
-        pi = np.zeros_like(mcts.root_list[0].prior)
-        pi[mcts.root_list[0].valid_moves] = mcts.root_list[0].children_visits / mcts.root_list[0].children_visits.sum()
-        idx = mcts.root_list[0].children_visits.argmax()
-        action = mcts.root_list[0].valid_moves[idx]
-        print(f"search policy:{pi}, action:{action}")
- 
-        if player == human:
-            action = int(input("Input action:"))
-            idx = np.where(mcts.root_list[0].valid_moves==action)[0][0]
- 
-        mcts.root_list[0] = mcts.root_list[0].children[idx]
-        parent = mcts.root_list[0].parent
-        mcts.root_list[0].parent = None
-        del parent
-    
-        state,winner,done = env.step(state, action, player) 
-        player = -player
-        if done:
-            env.render(state, player, winner, done)
-            human = int(input("Play First Or Second(1: First, -1:Second):"))
-            state = env.reset()                                             
-            player = 1                                                      
-            winner = 0                                                      
-            done = False
+        env.render(game_state)
+        running, reset, chosen_turn, click_pos = env.process_input(game_state)
+        
+        if reset:
+            game_state.reset(env.reset(), chosen_turn)
             mcts = MCTS(env, 1, args.c_puct, model, args.n_simulations, args.device)
+
+        elif not game_state.done:
+
+            action = None
+            if game_state.player == game_state.human:
+                if click_pos is not None:
+                    possible_action = env.get_possible_action(game_state, click_pos)
+                    if possible_action is not None: 
+                        idx = np.where(mcts.root_list[0].valid_moves==possible_action)[0]
+                        if idx.size != 0:
+                            action = possible_action
+            else: 
+                if game_state.turn == 0:
+                    game_state.thinking = True
+                    env.render(game_state)
+                    mcts.simulate()
+                    game_state.thinking = False
+                    env.render(game_state)
+
+                print(f"----------turn:{game_state.turn}----------")
+                print_node_stats(mcts.root_list[0])
+
+                pi = np.zeros_like(mcts.root_list[0].prior)
+                pi[mcts.root_list[0].valid_moves] = mcts.root_list[0].children_visits / mcts.root_list[0].children_visits.sum()
+                print(f"search policy:{pi}")
+                idx = mcts.root_list[0].children_visits.argmax()
+                action = mcts.root_list[0].valid_moves[idx]
+
+            if action is not None:
+                 
+                game_state.state, game_state.winner, game_state.done = env.step(
+                    game_state.state, action, game_state.player)
+                game_state.player = -game_state.player
+                game_state.turn += 1
+                env.update_last_move(game_state, action)
+
+                env.render(game_state)
+                
+                if game_state.turn == 1 and game_state.player != game_state.human:
+                    game_state.thinking = True
+                    env.render(game_state)
+                    mcts.simulate()
+  
+                idx = np.where(mcts.root_list[0].valid_moves==action)[0][0]
+                mcts.root_list[0] = mcts.root_list[0].children[idx]
+                parent = mcts.root_list[0].parent
+                mcts.root_list[0].parent = None
+                del parent
+ 
+                if game_state.player != game_state.human:
+                    game_state.thinking = True
+                    env.render(game_state)
+                    mcts.simulate()
+                    game_state.thinking = False
+                    env.render(game_state)
 
 def build_argparser():
     """
+    Constructs and configures a command-line argument parser for the RL application.
+    
+    Defines parameters for environment configuration, training/inference settings, 
+    model architecture, and algorithm hyperparameters. Uses argparse.RawTextHelpFormatter 
+    to preserve formatting in help messages.
+
+    Returns:
+        argparse.ArgumentParser: Configured parser object with all supported arguments.
     """
     description=(
             "mystRL is a simple Python implementation of RL."
@@ -249,6 +346,11 @@ def build_argparser():
                         choices=["train", "test"],
                         default="train",
                         help="Operating mode: 'train' for training, 'test' for evaluation")
+
+    parser.add_argument("--render_mode",
+                        choices=["gui", "text"],
+                        default="gui",
+                        help="if gui, use pygame to show")
 
     parser.add_argument("--model_path",
                         type=str,
@@ -292,7 +394,7 @@ def build_argparser():
  
     parser.add_argument("--n_simulations",
                         type=int,
-                        default=1000,
+                        default=500,
                         help="")
 
     parser.add_argument("--device",
@@ -345,6 +447,15 @@ def build_argparser():
 
 def main(env_cls, add_custom_argument_func=None):
     """
+    Entry point for executing RL training or evaluation workflows.
+    
+    Parses command-line arguments, optionally extends them through a custom function, 
+    and dispatches to the appropriate workflow handler based on the selected mode.
+
+    Args:
+        env_cls (class): Environment class to be used for RL tasks
+        add_custom_argument_func (function, optional): Callback for adding custom arguments 
+            to the parser. Expected signature: func(parser) -> modified_parser.
     """
     parser = build_argparser()
 

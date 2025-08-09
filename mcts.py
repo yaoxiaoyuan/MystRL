@@ -16,6 +16,8 @@ from logger import logger
 class Node: 
     def __init__(self, env, c_puct, parent, idx, state, player, winner, is_terminal):
         """
+        Initialize a MCTS tree node with game state, player, and environment references.
+        Stores game state information and initializes child node structures and statistics.
         """
         self.env = env
         self.c_puct = c_puct
@@ -27,20 +29,25 @@ class Node:
         self.is_terminal = is_terminal
         self.visits = 0
         self.children = []
+        self.valid_moves = self.env.get_valid_moves(self.state, self.player)
 
     def is_leaf(self):
         """
+        Determine if the current node is a leaf (unexpanded) node.
+        Returns True if no children exist, indicating expansion is needed.
         """
         return len(self.children) == 0
         
     def expand(self, prior):
         """
+        Expand the node by creating child nodes for all valid actions.
+        Uses prior probabilities for action exploration and initializes visit statistics.
+        Does nothing if the node represents a terminal game state.
         """
         if self.is_terminal:
             return
 
         self.prior = prior
-        self.valid_moves = self.env.get_valid_moves(self.state, self.player)
         self.children_visits = np.zeros_like(self.valid_moves, dtype=float)
         self.children_value = np.zeros_like(self.valid_moves, dtype=float) 
         self.children_prior = self.prior[self.valid_moves]
@@ -53,6 +60,9 @@ class Node:
         
     def select(self):
         """
+        Traverse the tree from this node using PUCT algorithm.
+        Recursively selects child with highest UCT until reaching leaf node.
+        Returns the leaf node where simulation/expansion will occur.
         """
         if self.is_leaf():
             return self
@@ -68,6 +78,9 @@ class Node:
 
     def backup(self, value):
         """
+        Propagate evaluation value backward through tree.
+        Updates node statistics (visit counts and value estimates) recursively.
+        Alternates value perspective when moving between players.
         """
         if self.parent:
             total_value = self.parent.children_value[self.idx] * self.parent.children_visits[self.idx] 
@@ -81,6 +94,17 @@ class Node:
 class MCTS:
     def __init__(self, env, n_envs, c_puct, model, n_simulations, device, states=None, players=None):
         """
+        Initialize Monte Carlo Tree Search with parallel environments.
+        
+        Args:
+            env: Game environment instance
+            n_envs: Number of parallel environments
+            c_puct: Exploration constant for UCT formula
+            model: Neural network for policy/value predictions
+            n_simulations: Max simulations per environment
+            device: Compute device (CPU/GPU)
+            states: Optional initial states for environments
+            players: Optional current players for states
         """ 
         self.env = env
         self.n_envs = n_envs
@@ -103,21 +127,20 @@ class MCTS:
 
     def is_done(self):
         """
+        Check if all environments have terminated.
+        
+        Returns:
+            bool: True if all environments have terminal states
         """ 
         return all(root.is_terminal for root in self.root_list)
 
     def simulate(self):
         """
+        Execute Monte Carlo Tree Search simulations across all environments.
+        Performs selection -> expansion -> neural evaluation -> backpropagation.
         """
         for i in range(self.n_simulations):
 
-            #print(f"simulations: {i}")
-            #if i > 0: 
-            #    print(f"valid_moves: {self.root_list[0].valid_moves}")
-            #    print(f"children_value: {self.root_list[0].children_value}")
-            #    print(f"childern_prior: {self.root_list[0].children_prior}")
-            #    print(f"children_visits: {self.root_list[0].children_visits}")
- 
             nodes = []
             for root in self.root_list:
                 if root.is_terminal:
@@ -128,9 +151,6 @@ class MCTS:
 
             if len(nodes) == 0:
                 break
- 
-            #print("select:")
-            #print(nodes[0].state)
 
             model_inputs = np.stack(
                 [
@@ -150,10 +170,6 @@ class MCTS:
                 node.expand(priors[j])
                 if node.winner != 0:
                     real_value = (node.winner * node.player)
-                    #print(real_value)
                     node.backup(real_value)
                 else:
                     node.backup(values[j])
-            #input()
-        #logger.info("simulation done.")
- 

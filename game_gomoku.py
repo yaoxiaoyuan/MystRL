@@ -1,3 +1,14 @@
+#encoding=utf-8
+#◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆◇◆
+#■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
+# Author: Xiaoyuan Yao
+# GitHub: https://github.com/yaoxiaoyuan/mystRL/
+# Contact: yaoxiaoyuan1990@gmail.com
+# Created: Sat Jun 14 15:08:00 2025
+# License: MIT
+# Version: 0.1.0
+#
+#■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 import sys
 import os
 import argparse
@@ -6,12 +17,13 @@ import time
 import numpy as np
 import torch
 import torch.nn as nn
+from board_game import BoardGame
 from alphazero import main
 
-class GomokuGame:
+class GomokuGame(BoardGame):
     def __init__(self, args):
         """
-        Initialize Connect4 game environment
+        Initialize Gomoku game environment
         
         Args:
             args: Configuration object containing:
@@ -22,6 +34,52 @@ class GomokuGame:
         self.width = args.width
         self.input_shape = [3, self.height, self.width] 
         self.n_actions = self.width * self.width
+
+    @property
+    def name(self):
+        """ 
+        """
+        return "MystRl Alpha Gomoku"
+
+    @property
+    def place_mode(self):
+        """
+        """
+        return "point"
+
+    @property
+    def board_color(self):
+        """
+        """
+        return (228, 200, 150)
+
+    @property
+    def line_color(self):
+        """
+        """
+        return (0, 0, 0)
+
+    @property
+    def player_1_color(self):
+        """
+        """
+        return (0, 0, 0)
+
+    @property
+    def player_2_color(self):
+        """
+        """
+        return (255, 255, 255)
+
+    def get_possible_action(self, game_state, pos):
+        """
+        """
+        return self.width * pos[0] + pos[1]
+
+    def update_last_move(self, game_state, action):
+        """
+        """
+        game_state.last_move = action
 
     def get_next_state(self, state, action, player):
         """
@@ -85,7 +143,7 @@ class GomokuGame:
                     if np.all(diag == color):
                         return color
                         
-                if i <= self.height - 5 and j >= 5:
+                if i <= self.height - 5 and j >= 4:
                     anti_diag = [state[i+k, j-k] for k in range(5)]
                     if np.all(anti_diag == color):
                         return color
@@ -156,23 +214,6 @@ class GomokuGame:
         """
         return np.zeros([self.height, self.width], dtype=np.int8)
 
-    def render(self, state, player, winner, done):
-        """
-        Initialize new game state
-        
-        Returns:
-            numpy.array: Zero-initialized game board
-        """
-        print("Current board:")                                                                          
-        print(state)                                                                                     
-        if not done:                                                                                     
-            print(f"Current player: {player}")                                                           
-        else:                                                                                            
-            if winner != 0:                                                                              
-                print(f"Game over! Winner: {winner}")                                                    
-            else:                                                                                        
-                print("Game over! It's a draw")                                                          
-        print("-" * 20)   
 
 def add_custom_argument(parser):
     """

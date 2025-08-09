@@ -2,31 +2,18 @@
 
 MystRL is a simple Python implementation of reinforcement learning from scratch.
 
-![snake](pic/snake.gif) ![2048](pic/2048.gif) ![tetris](pic/tetris.gif)
+![snake](pic/snake.gif) ![2048](pic/2048.gif) ![tetris](pic/tetris.gif) 
+![connect4](pic/connect4.png) ![othello](pic/othello.png)
 
 ### Install
 
 pip install -r requirements.txt
 
-### Contact
-
-Email address: yaoxiaoyuan1990@gmail.com.  Or you can add my WeChat:
-
- ![wechat](pic/wechat.jpg)
-
-### Cite
-
-```
-@misc{mimix,
-  title={MystRL},
-  author={Xiaoyuan Yao},
-  year={2025}
-}
-```
-
-### DQN
+### Download Models
 
 All the models can be download at https://drive.google.com/drive/folders/1tUH4VPNMT5zzQHpRoLYDDrHnRpOq45xj?usp=drive_link
+
+### DQN
 
 #### Snake 
 
@@ -100,7 +87,7 @@ python game_2048.py --mode train --device cuda --task_name 2048 --save_path mode
 #### Tetris
 
 Most literature on Tetris AI simplifies the piece placement process to address the core challenge of sparse rewards in reinforcement learning. When agents must execute each movement step (e.g., multiple left/right/turn actions) to position a piece, they receive delayed feedback only upon final placement. This creates a severe credit assignment problem—it's impossible to distinguish which intermediate actions truly contributed to a good outcome amid potentially wasteful moves. Consequently, the common compromise allows the agent to select a piece's final valid placement directly, bypassing the intermediate movements. This offers crucial advantages: it eliminates the need to learn trivial motor skills, focuses the AI purely on strategic board evaluation (like setting up scoring opportunities rather than executing them), and drastically reduces the action space while maintaining meaningful decision-making for each placement. This simplification provides immediate feedback linking choices to board states, enabling efficient learning of high-level strategy.
-On the contrary, this project enforces AI mastery of precise piece manipulation. We implement Potential-based Reward Shaping, which strategically alleviates sparse rewards by delivering immediate feedback. 
+**On the contrary, this project enforces AI mastery of precise piece manipulation. We implement Potential-based Reward Shaping, which strategically alleviates sparse rewards by delivering immediate feedback.** 
 
 The reward function can be written as:
 
@@ -115,10 +102,10 @@ $$
 $$
 r(s,a) = 
 \begin{cases}
-  1 & \text{if } clear\_lines =1 \\
-  3 & \text{if } clear\_lines =2 \\
-  5 & \text{if } clear\_lines =3 \\
-  8 & \text{if } clear\_lines =4 \\
+  1 & \text{if } clear\_{lines} =1 \\
+  3 & \text{if } clear\_{lines} =2 \\
+  5 & \text{if } clear\_{lines} =3 \\
+  8 & \text{if } clear\_{lines} =4 \\
   -100 & \text{if } \text{dead}  \\
   0 & \text{otherwise} \\
 \end{cases}
@@ -132,15 +119,15 @@ After training, the test results are as follows (conducted on 1000 games):
 
 | Total Games | Average Score | Average Clear Lines |
 | ----------- | ------------- | ------------------- |
-| 1000        | 34589         | 316.23              |
+| 1000        | 42146         | 383.65              |
 
 ##### How To Test
 
-python game_tetris.py --mode test --min_eps -1 --model_path model/tetris/episode-49000/model_weights --render_mode gui --speed 30
+python game_tetris.py --mode test --min_eps -1 --model_path model/tetris/episode-54000/model_weights --render_mode gui --speed 30
 
 ##### How To Train 
 
-python game_tetris.py --mode train --device cuda --task_name tetris --save_path model/tetris --min_eps 0.0005 --lr 2e-4 --batch_size 32 --save_every_episodes 1000 --decay_rate 200000 --min_train_buffer_size 100000 --buffer_size 20000000 --target_update_frequency 10000 --lr_scheduler cosine --total_decay_episodes 20000 --min_lr 1e-5 --n_episode 50000
+python game_tetris.py --mode train --device cuda --task_name tetris --save_path model/tetris --min_eps 0.0005 --lr 2e-4 --batch_size 32 --save_every_episodes 1000 --decay_rate 200000 --min_train_buffer_size 100000 --buffer_size 20000000 --target_update_frequency 10000 --lr_scheduler cosine --total_decay_episodes 20000 --min_lr 1e-5 --n_episode 55000
 
 #### **DQN Training Tips** 
 
@@ -148,4 +135,20 @@ python game_tetris.py --mode train --device cuda --task_name tetris --save_path 
 2. **Avoid using excessively large batch sizes (start with 16 as a typical trial value), as this fundamentally differs from supervised training (e.g., image classification).**
 3. **Avoid overemphasizing widely-touted advanced techniques (e.g., Double DQN/Dueling DQN/Multi-step DQN, etc.) — begin experimentation with basic DQN implementations.**
 4. **If your model exhibits significant performance degradation in later training phases, try learning rate decay at an earlier stage.**
+
+### Contact
+
+Email address: yaoxiaoyuan1990@gmail.com.  Or you can add my WeChat:
+
+ ![wechat](pic/wechat.jpg)
+
+### Cite
+
+```
+@misc{mimix,
+  title={MystRL},
+  author={Xiaoyuan Yao},
+  year={2025}
+}
+```
 
