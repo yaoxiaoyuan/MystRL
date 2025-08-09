@@ -15,6 +15,13 @@ All the models can be download at https://drive.google.com/drive/folders/1tUH4VP
 
 ### DQN
 
+**DQN** (Deep Q-Network) is a reinforcement learning algorithm that uses a deep neural network to make an agent's decisions. Instead of storing all possible states and actions in a traditional Q-table, DQN uses a neural network to estimate the value (Q-value) of each action from a given state, allowing it to handle complex environments like video games.
+
+To make the learning process stable, DQN uses two main techniques:
+
+- Experience Replay: It stores the agent's past experiences (state, action, reward, next state) in a memory buffer and randomly samples from it to train the network. This breaks the correlation between consecutive experiences.
+- Target Network: It uses a second, separate network to set the training targets. This "target network" is updated less frequently than the main network, which helps prevent the model from becoming unstable during training.
+
 #### Snake 
 
 Snake is a fundamentally simple yet thrilling challenge where players guide a continuously moving line across a grid. The objective is to navigate the snake, using directional controls to collect food items like pellets or apples, each consumed piece causing the snake to grow longer. Success requires quick reflexes and careful planning, as the primary danger comes from the snake itself: colliding with any part of its own ever-lengthening body instantly ends the game. This creates an escalating challenge, where the very act of growing and progressing makes maneuvering in the confined space increasingly perilous.
@@ -136,6 +143,14 @@ python game_tetris.py --mode train --device cuda --task_name tetris --save_path 
 
 ### AlphaZero
 
+**AlphaZero** is a reinforcement learning algorithm that masters games like chess, shogi, and Go entirely through **self-play**, without any human knowledge or data. It learns to play by starting from random moves and improving over time by playing millions of games against itself.
+
+The algorithm has three main components:
+
+- A **deep neural network** that is trained to predict the best move to make from a given game state (the policy) and the likely winner of the game (the value).
+- **Monte Carlo Tree Search (MCTS)**, an advanced search algorithm that uses the neural network's predictions to explore possible moves and build a game tree, helping the AI decide on the most promising action.
+- **Self-play**, the engine of AlphaZero's learning. The algorithm repeatedly plays games against itself. Each game provides new data (game states, chosen moves, and the final winner) to train the neural network, continuously improving its policy and value predictions.
+
 #### Connect4
 
 Connect Four is a two-player game played on a vertical grid. Players take turns dropping colored discs from the top into one of the seven columns. The goal is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs. The game ends when a player achieves this goal or when the grid is completely filled, resulting in a draw.
@@ -144,17 +159,17 @@ Connect Four is a two-player game played on a vertical grid. Players take turns 
 
 ##### How To Train 
 
-#### Gomoku
+#### Othello
 
-Gomoku, also known as Five in a Row, is an abstract strategy board game. Played with black and white stones on a 15x15 grid, two players take turns placing their stones on an empty intersection. The objective is to be the first to form an unbroken line of five stones of the same color, either horizontally, vertically, or diagonally.
+Othello, or Reversi, is a two-player board game played on an 8x8 grid. Players use identical discs that are light on one side and dark on the other. The game begins with four discs placed in the center of the board. Players take turns placing a disc with their color facing up. A move is only legal if it "flanks" one or more of the opponent's discs, meaning the new disc and another disc of the player's color are at opposite ends of a straight line of the opponent's discs. The flanked discs are then flipped to the player's color. The game ends when neither player can make a legal move, and the player with the most discs of their color on the board wins.
 
 ##### How To Test
 
 ##### How To Train 
 
-#### Othello
+#### Gomoku
 
-Othello, or Reversi, is a two-player board game played on an 8x8 grid. Players use identical discs that are light on one side and dark on the other. The game begins with four discs placed in the center of the board. Players take turns placing a disc with their color facing up. A move is only legal if it "flanks" one or more of the opponent's discs, meaning the new disc and another disc of the player's color are at opposite ends of a straight line of the opponent's discs. The flanked discs are then flipped to the player's color. The game ends when neither player can make a legal move, and the player with the most discs of their color on the board wins.
+Gomoku, also known as Five in a Row, is an abstract strategy board game. Played with black and white stones on a 15x15 grid, two players take turns placing their stones on an empty intersection. The objective is to be the first to form an unbroken line of five stones of the same color, either horizontally, vertically, or diagonally.
 
 ##### How To Test
 
