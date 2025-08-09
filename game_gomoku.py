@@ -74,7 +74,7 @@ class GomokuGame(BoardGame):
     def get_possible_action(self, game_state, pos):
         """
         """
-        return self.width * pos[0] + pos[1]
+        return pos
 
     def update_last_move(self, game_state, action):
         """

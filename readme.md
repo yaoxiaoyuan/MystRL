@@ -72,9 +72,7 @@ After training, the test results are as follows (conducted on 500 games):
 | ----------- | ------------- | ------------------------- |
 | 500         | 29630         | 0.63                      |
 
-| 4096 Rate | 2048 Rate | 1024 Rate | 512 Rate | 256 Rate | 128 Rate |
-| --------- | --------- | --------- | -------- | -------- | -------- |
-| 0.102     | 0.528     | 0.3       | 0.06     | 0.008    | 0.002    |
+![tile_rate](pic/tile_rate.png)
 
 ##### How To Test
 
@@ -140,17 +138,23 @@ python game_tetris.py --mode train --device cuda --task_name tetris --save_path 
 
 #### Connect4
 
+Connect Four is a two-player game played on a vertical grid. Players take turns dropping colored discs from the top into one of the seven columns. The goal is to be the first to form a horizontal, vertical, or diagonal line of four of one's own discs. The game ends when a player achieves this goal or when the grid is completely filled, resulting in a draw.
+
 ##### How To Test
 
 ##### How To Train 
 
 #### Gomoku
 
+Gomoku, also known as Five in a Row, is an abstract strategy board game. Played with black and white stones on a 15x15 grid, two players take turns placing their stones on an empty intersection. The objective is to be the first to form an unbroken line of five stones of the same color, either horizontally, vertically, or diagonally.
+
 ##### How To Test
 
 ##### How To Train 
 
 #### Othello
+
+Othello, or Reversi, is a two-player board game played on an 8x8 grid. Players use identical discs that are light on one side and dark on the other. The game begins with four discs placed in the center of the board. Players take turns placing a disc with their color facing up. A move is only legal if it "flanks" one or more of the opponent's discs, meaning the new disc and another disc of the player's color are at opposite ends of a straight line of the opponent's discs. The flanked discs are then flipped to the player's color. The game ends when neither player can make a legal move, and the player with the most discs of their color on the board wins.
 
 ##### How To Test
 

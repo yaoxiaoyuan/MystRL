@@ -148,8 +148,12 @@ def train_az(env_cls, args):
     for i in range(args.n_total_games//(args.n_parallel_games*args.n_processes)):
 
         logger.info(f"{i}-th self play start.") 
-
-        tasks = [(task_id, env, model, args) for task_id in range(args.n_processes)]
+        
+        if i == 0:
+            tasks = [(task_id, env, None, args) for task_id in range(args.n_processes)]
+        else:
+            tasks = [(task_id, env, model, args) for task_id in range(args.n_processes)]
+            
         with mp.Pool(processes=args.n_processes) as pool:
             result_lists = pool.starmap(self_play, tasks)
  
