@@ -136,6 +136,26 @@ python game_tetris.py --mode train --device cuda --task_name tetris --save_path 
 3. **Avoid overemphasizing widely-touted advanced techniques (e.g., Double DQN/Dueling DQN/Multi-step DQN, etc.) — begin experimentation with basic DQN implementations.**
 4. **If your model exhibits significant performance degradation in later training phases, try learning rate decay at an earlier stage.**
 
+### AlphaZero
+
+#### Connect4
+
+##### How To Test
+
+##### How To Train 
+
+#### Gomoku
+
+##### How To Test
+
+##### How To Train 
+
+#### Othello
+
+##### How To Test
+
+##### How To Train 
+
 ### Contact
 
 Email address: yaoxiaoyuan1990@gmail.com.  Or you can add my WeChat:
