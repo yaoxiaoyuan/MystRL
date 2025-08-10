@@ -25,7 +25,7 @@ TEXT_COLOR = (250, 250, 250)
 OPTION_BUTTON = (90, 140, 170) 
 OPTION_HOVER = (110, 160, 190) 
 ACCENT_COLOR = (180, 70, 60)   
-LAST_FOCUS_COLOR = (0, 100, 255)
+LAST_FOCUS_COLOR = (0, 0, 0)
 
 class Button:
     def __init__(self, x, y, width, height, text, window_width, window_height):
@@ -327,7 +327,7 @@ class BoardGame():
 
         start_pos = (center_x + 0.45*self.cell_size, center_y + 0.45*self.cell_size)
         end_pos = (center_x + 0.45*self.cell_size, center_y + 0.35*self.cell_size)
-        pygame.draw.line(self.screen, color, start_pos, end_pos, 2)
+        pygame.draw.line(self.screen, color, start_pos, end_pos, 1)
 
     def render(self, game_state):
         """
