@@ -662,7 +662,7 @@ def build_argparser():
 
     parser.add_argument("--render_mode",
                         choices=["gui", "text"],
-                        default="text",
+                        default="gui",
                         help="if gui, use pygame to show")
 
     parser.add_argument("--fps",
