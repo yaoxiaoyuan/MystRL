@@ -3,7 +3,7 @@
 MystRL is a simple Python implementation of reinforcement learning from scratch.
 
 ![snake](pic/snake.gif) ![2048](pic/2048.gif) ![tetris](pic/tetris.gif) 
-![connect4](pic/connect4.png) ![othello](pic/othello.png)
+![connect4](pic/connect4.png) ![othello](pic/othello.png) ![gomoku](pic/gomoku.png)
 
 ### Install
 
@@ -11,7 +11,11 @@ pip install -r requirements.txt
 
 ### Download Models
 
-All the models can be download at https://drive.google.com/drive/folders/1tUH4VPNMT5zzQHpRoLYDDrHnRpOq45xj?usp=drive_link
+All the models can be download at https://drive.google.com/drive/folders/1xYKtd0LPHD4llrtssdLDn2qzlE-4bL-8?usp=sharing
+
+### Hardware Requirements
+
+All experiments were tested or predicted to be runnable on a laptop CPU. All training was conducted on a single **A800 GPU** with a **30-core CPU** and 180GB of **RAM**.
 
 ### DQN
 
@@ -157,7 +161,11 @@ Connect Four is a two-player game played on a vertical grid. Players take turns 
 
 ##### How To Test
 
+python game_connect4.py --mode test --model_path model/connect4/iteration-399/model_weights
+
 ##### How To Train 
+
+python game_connect4.py --task_name connect4 --mode train --device cuda --n_parallel_games 20 --n_process 25 --n_simulations 500 --batch_size 128 --save_path model/connect4 --train_epochs 5 --n_total_games 200000
 
 #### Othello
 
@@ -165,7 +173,11 @@ Othello, or Reversi, is a two-player board game played on an 8x8 grid. Players u
 
 ##### How To Test
 
+python game_othello.py --mode test --model_path model/othello/iteration-399/model_weights
+
 ##### How To Train 
+
+python game_othello.py --task_name othello --mode train --device cuda --n_parallel_games 20 --n_process 25 --n_simulations 500 --batch_size 128 --save_path model/othello --train_epochs 5 --n_total_games 200000
 
 #### Gomoku
 
@@ -173,7 +185,11 @@ Gomoku, also known as Five in a Row, is an abstract strategy board game. Played 
 
 ##### How To Test
 
+python game_gomoku.py --mode test --model_path model/gomoku/iteration-39/model_weights
+
 ##### How To Train 
+
+python game_gomoku.py --task_name gomoku --mode train --device cuda --n_parallel_games 20 --n_process 25 --n_simulations 500 --batch_size 128 --save_path model/gomoku --train_epochs 5 --n_total_games 20000
 
 ### Contact
 
