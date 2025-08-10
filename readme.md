@@ -15,7 +15,7 @@ All the models can be download at https://drive.google.com/drive/folders/1xYKtd0
 
 ### Hardware Requirements
 
-All experiments were tested or predicted to be runnable on a laptop CPU. All training was conducted on a single **A800 GPU** with a **30-core CPU** and 180GB of **RAM**.
+All models can be tested on a laptop (even without a GPU).  All training was conducted on a single **A800 GPU** with a **30-core CPU** and 180GB of **RAM**.
 
 ### DQN
 
