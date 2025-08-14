@@ -3,7 +3,7 @@
 MystRL is a simple Python implementation of reinforcement learning from scratch.
 
 ![snake](pic/snake.gif) ![2048](pic/2048.gif) ![tetris](pic/tetris.gif) 
-![connect4](pic/connect4.png) ![othello](pic/othello.png) ![gomoku](pic/gomoku.png)
+![connect4](pic/connect4.png) ![othello](pic/othello.png) ![gomoku](pic/gomoku.png) ![hex](pic/hex.png)
 
 ### Install
 
