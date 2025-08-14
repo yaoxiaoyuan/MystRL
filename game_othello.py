@@ -9,14 +9,7 @@
 # Version: 0.1.0
 #
 #■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-import sys
-import os
-import argparse
-import random
-import time
 import numpy as np
-import torch
-import torch.nn as nn
 from board_game import BoardGame
 from alphazero import main
 
@@ -85,6 +78,15 @@ class OthelloGame(BoardGame):
 
     def get_next_state(self, state, action, player):
         """
+        Generate next game state after player's move
+        
+        Args:
+            state (numpy.array): Current game board (height x width)
+            action (int): Column index where piece is dropped
+            player (int): Player ID (1 or -1)
+            
+        Returns:
+            numpy.array: Updated game board after move
         """
         if action == self.height * self.width:
             return state.copy()
@@ -119,6 +121,14 @@ class OthelloGame(BoardGame):
 
     def get_valid_moves(self, state, player):
         """
+        Identify legal moves at current state
+        
+        Args:
+            state (numpy.array): Current game board
+            player (int): Player ID (unused, preserved for interface consistency)
+            
+        Returns:
+            numpy.array: Array of columns with available space
         """
         valid_actions = []
         for r in range(self.height):
@@ -142,6 +152,13 @@ class OthelloGame(BoardGame):
 
     def check_winner(self, state):
         """
+        Check win conditions for all possible lines
+        
+        Args:
+            state (numpy.array): Game board to evaluate
+            
+        Returns:
+            int: 0 = no winner, 1 = player1 wins, -1 = player2 wins
         """
         # Count discs for final score
         count_1 = np.sum(state == 1)
@@ -156,6 +173,14 @@ class OthelloGame(BoardGame):
 
     def check_done(self, state, player):
         """
+        Check if board is completely filled (draw condition)
+        
+        Args:
+            state (numpy.array): Game board to check
+            player (int): Player ID (1 or -1)  
+  
+        Returns:
+            bool: True if board full, False otherwise
         """
         # Board is completely filled
         if np.all(state != 0):
@@ -166,6 +191,19 @@ class OthelloGame(BoardGame):
 
     def convert_to_model_inputs(self, state, player):
         """
+        Convert game state to neural network input format
+        
+        Creates 3 channels:
+        Channel 0: Positions of player 1's pieces
+        Channel 1: Positions of player 2's pieces
+        Channel 2: Constant value indicating current player
+        
+        Args:
+            state (numpy.array): Original game board
+            player (int): Current player ID (1 or -1)
+            
+        Returns:
+            numpy.array: Shaped [3, height, width] for model input
         """
         return np.stack((
             state == 1,   
@@ -175,6 +213,18 @@ class OthelloGame(BoardGame):
 
     def step(self, state, action, player):
         """
+        Execute single game step (move + state update)
+        
+        Args:
+            state (numpy.array): Current game board
+            action (int): Selected column index
+            player (int): Player making the move
+            
+        Returns:
+            tuple: (new_state, winner, done)
+                new_state: Updated game board
+                winner: 0=no win, 1/-1=winning player
+                done: Terminal state flag
         """
         new_state = self.get_next_state(state, action, player)
         winner = 0
@@ -185,6 +235,12 @@ class OthelloGame(BoardGame):
 
     def reset(self):
         """
+        Initialize and return the starting board configuration for Reversi (Othello).
+    
+        Returns:
+            ndarray: A 2D integer array of shape (height, width) with:
+                     - Default dimensions defined by self.height and self.width
+                     - Data type as 8-bit integers (int8)
         """
         board = np.zeros((self.height, self.width), dtype=np.int8)
         # Set up center pieces

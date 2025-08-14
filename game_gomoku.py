@@ -9,14 +9,7 @@
 # Version: 0.1.0
 #
 #■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
-import sys
-import os
-import argparse
-import random
-import time
 import numpy as np
-import torch
-import torch.nn as nn
 from board_game import BoardGame
 from alphazero import main
 
@@ -187,18 +180,6 @@ class GomokuGame(BoardGame):
 
     def step(self, state, action, player):
         """
-        """ 
-        new_state = self.get_next_state(state, action, player) 
-
-        winner = self.check_winner(new_state)
-        done = (winner != 0)      
-        if not winner:
-            done = self.check_done(new_state, -player)        
-
-        return new_state, winner, done
- 
-    def reset(self):
-        """
         Execute single game step (move + state update)
         
         Args:
@@ -211,6 +192,25 @@ class GomokuGame(BoardGame):
                 new_state: Updated game board
                 winner: 0=no win, 1/-1=winning player
                 done: Terminal state flag
+        """ 
+        new_state = self.get_next_state(state, action, player) 
+
+        winner = self.check_winner(new_state)
+        done = (winner != 0)      
+        if not winner:
+            done = self.check_done(new_state, -player)        
+
+        return new_state, winner, done
+ 
+    def reset(self):
+        """
+        Initialize and return the starting game board state.
+    
+        Returns:
+            ndarray: A 2D integer array of shape (height, width) representing:
+                     - Empty game board (all zeros)
+                     - Board dimensions are defined by self.height and self.width
+                     - Data type optimized as 8-bit integers (int8)
         """
         return np.zeros([self.height, self.width], dtype=np.int8)
 

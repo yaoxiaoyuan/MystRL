@@ -55,6 +55,8 @@ After training, the test results are as follows (conducted on 500 games):
 
 python game_snake.py --mode test --min_eps -1 --model_path model/snake/episode-100000/model_weights --render_mode gui --speed 10
 
+Add --device cuda if you have a GPU available.
+
 ##### How To Train 
 
 python game_snake.py --mode train --device cuda --task_name snake --save_path model/snake --min_eps 0.001 --lr 2e-4 --min_lr 1e-5 --total_decay_episodes 20000 --batch_size 16 --save_every_episodes 2000 --decay_rate 200000 --min_train_buffer_size 100000 --buffer_size 10000000 --n_last_frames 4 --target_update_frequency 10000  --lr_scheduler cosine
@@ -88,6 +90,8 @@ After training, the test results are as follows (conducted on 500 games):
 ##### How To Test
 
 python game_2048.py --mode test --min_eps -1 --model_path model/2048/episode-20000/model_weights --render_mode gui
+
+Add --device cuda if you have a GPU available.
 
 ##### How To Train 
 
@@ -133,6 +137,8 @@ After training, the test results are as follows (conducted on 1000 games):
 ##### How To Test
 
 python game_tetris.py --mode test --min_eps -1 --model_path model/tetris/episode-54000/model_weights --render_mode gui --speed 30
+
+Add --device cuda if you have a GPU available.
 
 ##### How To Train 
 

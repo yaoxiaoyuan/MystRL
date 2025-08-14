@@ -10,6 +10,7 @@
 #
 #■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 from dataclasses import dataclass
+import math
 import numpy as np
 try:
     import pygame
@@ -26,6 +27,8 @@ OPTION_BUTTON = (90, 140, 170)
 OPTION_HOVER = (110, 160, 190) 
 ACCENT_COLOR = (180, 70, 60)   
 LAST_FOCUS_COLOR = (0, 0, 0)
+EMPTY_COLOR = (200, 200, 200) 
+LINE_COLOR = (0, 0, 0) 
 
 class Button:
     def __init__(self, x, y, width, height, text, window_width, window_height):
@@ -197,6 +200,12 @@ class BoardGame():
         return "grid"
 
     @property
+    def grid_shape(self):
+        """
+        """
+        return "square"
+
+    @property
     def board_color(self):
         """
         """
@@ -232,20 +241,26 @@ class BoardGame():
         pygame.init()
         
         self.padding = 5
-        self.cell_size = 40
+        self.cell_size = 50
         self.info_width = 300
-        
-        if self.place_mode == "grid":
-            self.board_height = (self.height+1) * self.cell_size
-            self.board_width = (self.width+1) * self.cell_size
-            self.window_height = 3*self.padding + self.board_height
-            self.window_width = 2*self.padding + self.board_width + self.info_width
-        else:
-            self.board_height = self.height * self.cell_size
-            self.board_width = self.width * self.cell_size
-            self.window_height = 3*self.padding + self.board_height 
-            self.window_width = 2*self.padding + self.board_width + self.info_width
          
+        if self.grid_shape == "square": 
+            if self.place_mode == "grid":
+                self.board_height = (self.height+1) * self.cell_size
+                self.board_width = (self.width+1) * self.cell_size
+                self.window_height = 3*self.padding + self.board_height
+                self.window_width = 2*self.padding + self.board_width + self.info_width
+            else:
+                self.board_height = self.height * self.cell_size
+                self.board_width = self.width * self.cell_size
+                self.window_height = 3*self.padding + self.board_height 
+                self.window_width = 2*self.padding + self.board_width + self.info_width
+        elif self.grid_shape == "hex": 
+            self.board_height = (0.75*self.height+0.25) * self.cell_size
+            self.board_width = math.sqrt(3)*0.5*(self.width+self.height*0.5-0.5)*self.cell_size
+            self.window_height = 3*self.padding + self.board_height
+            self.window_width = 2*self.padding + self.board_width + self.info_width 
+           
         self.radius = int(self.cell_size * 0.4)
 
         self.reset_button_width = self.info_width * 2 // 3
@@ -289,13 +304,17 @@ class BoardGame():
 
     def draw_focus_box(self, row, col, color):
         """
-        """         
-        if self.place_mode == "point":
-            center_x = self.padding + (col+0.5)*self.cell_size
-            center_y = self.padding + (row+0.5)*self.cell_size
-        else:  
-            center_x = self.padding + (col+1)*self.cell_size
-            center_y = self.padding + (row+1)*self.cell_size
+        """  
+        if self.grid_shape == "square":       
+            if self.place_mode == "point":
+                center_x = self.padding + (col+0.5)*self.cell_size
+                center_y = self.padding + (row+0.5)*self.cell_size
+            else:  
+                center_x = self.padding + (col+1)*self.cell_size
+                center_y = self.padding + (row+1)*self.cell_size
+        else:
+            center_x = self.padding + math.sqrt(3) * 0.5 * (col+0.5+row*0.5) * self.cell_size
+            center_y = self.padding + (0.75*row + 0.5) * self.cell_size
 
         start_pos = (center_x - 0.45*self.cell_size, center_y - 0.45*self.cell_size)
         end_pos = (center_x - 0.35*self.cell_size, center_y - 0.45*self.cell_size)
@@ -329,6 +348,133 @@ class BoardGame():
         end_pos = (center_x + 0.45*self.cell_size, center_y + 0.35*self.cell_size)
         pygame.draw.line(self.screen, color, start_pos, end_pos, 1)
 
+    def draw_hexagon(self, center_x, center_y, size, border=False, color=None):
+        """
+        Draws a single hexagon on the given surface.
+        """ 
+        radius = size / 2.0
+        points = []
+        
+        for i in range(6):
+            angle_deg = 60 * i - 30
+            angle_rad = math.pi / 180 * angle_deg
+            
+            x = center_x + radius * math.cos(angle_rad)
+            y = center_y + radius * math.sin(angle_rad)
+            points.append((x, y))
+        
+        if not color:
+            color = EMPTY_COLOR
+        pygame.draw.polygon(self.screen, color, points)
+        if border:
+            pygame.draw.polygon(self.screen, LINE_COLOR, points, 1) 
+
+    def draw_triangle(self, points, scale_factor, color):
+        centroid_x = sum(p[0] for p in points) / 3
+        centroid_y = sum(p[1] for p in points) / 3
+        
+        small_points = []
+        for px, py in points:
+            vec_x = px - centroid_x
+            vec_y = py - centroid_y
+            
+            vec_x *= scale_factor
+            vec_y *= scale_factor
+            
+            small_points.append((centroid_x + vec_x, centroid_y + vec_y))
+        pygame.draw.polygon(self.screen, color, small_points)
+
+    def draw_board(self):
+        """
+        """
+        height,width = self.height, self.width
+        if self.place_mode == "point":
+            height,width = height-1,width-1
+
+        if self.grid_shape == "square":
+            for row in range(height+1):
+                start_pos = (self.padding+self.cell_size//2, self.padding + (row+0.5)*self.cell_size)
+                end_pos = (self.padding - self.cell_size//2 + self.board_width, self.padding + (row+0.5)*self.cell_size)
+                pygame.draw.line(self.screen, self.line_color, start_pos, end_pos, 1)
+            for col in range(width+1):
+                start_pos = (self.padding + (col+0.5)*self.cell_size, self.padding+self.cell_size//2)
+                end_pos = (self.padding + (col+0.5)*self.cell_size, self.padding - self.cell_size//2 + self.board_height)
+                pygame.draw.line(self.screen, self.line_color, start_pos, end_pos, 1)
+        else:
+            for row in range(height):
+                for col in range(width):
+                    center_x = self.padding + math.sqrt(3) * 0.5 * (col+0.5+row*0.5) * self.cell_size
+                    center_y = self.padding + (0.75*row + 0.5) * self.cell_size
+                    self.draw_hexagon(center_x, center_y, self.cell_size, border=True)
+
+                    if (row == 0 or row == height-1) and col < width-1:
+                        x1 = center_x + 0.05*self.cell_size 
+                        x2 = center_x + math.sqrt(3) * 0.5 * self.cell_size 
+                        x3 = (x1 + x2) / 2
+                        if row == 0:
+                            y1 = center_y - 0.5*self.cell_size
+                            y2 = y1
+                            y3 = center_y - 0.25*self.cell_size 
+                        else:
+                            y1 = center_y + 0.5*self.cell_size
+                            y2 = y1
+                            y3 = center_y + 0.25*self.cell_size 
+
+                        points = [(x1, y1), (x2, y2), (x3, y3)]
+                        self.draw_triangle(points, 0.9, self.player_1_color)
+
+                    if (col == 0) and row < height-1:
+                        x1 = center_x - math.sqrt(3)*0.25*self.cell_size
+                        y1 = center_y + 0.25*self.cell_size
+                        x2 = center_x 
+                        y2 = center_y + 0.5*self.cell_size
+                        x3 = center_x 
+                        y3 = center_y + self.cell_size
+                        points = [(x1, y1), (x2, y2), (x3, y3)]
+                        self.draw_triangle(points, 0.9, self.player_2_color)
+
+                    if (col == width-1) and row < height-1:
+                        x1 = center_x + math.sqrt(3)*0.25*self.cell_size
+                        y1 = center_y - 0.25*self.cell_size
+                        x2 = x1
+                        y2 = center_y + 0.25*self.cell_size
+                        x3 = center_x + math.sqrt(3)*0.5*self.cell_size
+                        y3 = center_y + 0.5*self.cell_size
+                        points = [(x1, y1), (x2, y2), (x3, y3)]
+                        self.draw_triangle(points, 0.9, self.player_2_color)
+
+    def draw_pieces_or_stone(self, state):
+        """
+        """
+        height,width = self.height, self.width
+        if self.place_mode == "point":
+            height,width = height-1,width-1
+        for i in range(self.height):
+            for j in range(self.width):
+                if state[i][j] == 0:
+                    continue
+
+                color = self.player_2_color
+                if state[i][j] == 1:
+                    color = self.player_1_color
+ 
+                if self.grid_shape == "square":
+                    if self.place_mode == "point":
+                        center_x = self.padding + (j+0.5)*self.cell_size
+                        center_y = self.padding + (i+0.5)*self.cell_size
+                    else:
+                        center_x = self.padding + (j+1)*self.cell_size
+                        center_y = self.padding + (i+1)*self.cell_size
+                    pygame.draw.circle(
+                                      self.screen,
+                                      color,
+                                      (center_x, center_y),
+                                      self.radius)
+                else: 
+                    center_x = self.padding + math.sqrt(3) * 0.5 * (j+0.5+i*0.5) * self.cell_size
+                    center_y = self.padding + (0.75*i + 0.5) * self.cell_size
+                    self.draw_hexagon(center_x, center_y, self.cell_size*0.8, border=False, color=color)
+
     def render(self, game_state):
         """
         """
@@ -350,40 +496,8 @@ class BoardGame():
         pygame.draw.rect(self.screen, self.board_color, 
                          (self.padding, self.padding, self.board_width, self.board_height))
 
-        height,width = self.height, self.width
-        if self.place_mode == "point":
-            height,width = height-1,width-1
- 
-        for row in range(height+1):
-            start_pos = (self.padding+self.cell_size//2, self.padding + (row+0.5)*self.cell_size)
-            end_pos = (self.padding - self.cell_size//2 + self.board_width, self.padding + (row+0.5)*self.cell_size)
-            pygame.draw.line(self.screen, self.line_color, start_pos, end_pos, 1)
-
-        for col in range(width+1):
-            start_pos = (self.padding + (col+0.5)*self.cell_size, self.padding+self.cell_size//2)
-            end_pos = (self.padding + (col+0.5)*self.cell_size, self.padding - self.cell_size//2 + self.board_height)
-            pygame.draw.line(self.screen, self.line_color, start_pos, end_pos, 1)
-
-        for i in range(self.height):
-            for j in range(self.width):
-                if state[i][j] == 0:
-                    continue
-
-                color = self.player_2_color
-                if state[i][j] == 1:
-                    color = self.player_1_color
-
-                if self.place_mode == "point":
-                    center_x = self.padding + (j+0.5)*self.cell_size 
-                    center_y = self.padding + (i+0.5)*self.cell_size 
-                else: 
-                    center_x = self.padding + (j+1)*self.cell_size  
-                    center_y = self.padding + (i+1)*self.cell_size 
-                pygame.draw.circle(
-                                  self.screen,
-                                  color, 
-                                  (center_x, center_y),
-                                  self.radius)
+        self.draw_board()
+        self.draw_pieces_or_stone(state)
 
         if player in [1, -1]:
 
@@ -484,14 +598,22 @@ class BoardGame():
                running = False
             if event.type == pygame.MOUSEBUTTONDOWN:
                x, y = event.pos
-               if self.place_mode == "point":
-                   row = (y - self.padding) // self.cell_size
-                   col = (x - self.padding) // self.cell_size
-               else:
-                   row = (y - self.padding - self.cell_size//2) // self.cell_size
-                   col = (x - self.padding - self.cell_size//2) // self.cell_size              
-               if row >= 0 and row <= self.height and col >= 0 and col <= self.width:
-                   pos = row * self.width + col 
+               if self.grid_shape == "square":
+                   if self.place_mode == "point":
+                       row = (y - self.padding) // self.cell_size
+                       col = (x - self.padding) // self.cell_size
+                   else:
+                       row = (y - self.padding - self.cell_size//2) // self.cell_size
+                       col = (x - self.padding - self.cell_size//2) // self.cell_size              
+                   if row >= 0 and row <= self.height and col >= 0 and col <= self.width:
+                       pos = row * self.width + col
+               elif self.grid_shape == "hex":
+                    for row in range(self.height):
+                        for col in range(self.width):
+                            center_x = self.padding + math.sqrt(3) * 0.5 * (col+0.5+row*0.5) * self.cell_size
+                            center_y = self.padding + (0.75*row + 0.5) * self.cell_size
+                            if (x-center_x)**2 + (y-center_y)**2 < self.cell_size**2/4:
+                                pos = row * self.width + col
             reset,human = self.reset_button.handle_event(event)
             click_pass = self.pass_button.handle_event(event)
             if click_pass:

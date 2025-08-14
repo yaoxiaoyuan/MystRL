@@ -11,11 +11,7 @@
 #■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 import sys
 import os
-import math
-import logging
 import random
-import time
-import json
 import argparse
 import numpy as np
 import torch
@@ -343,108 +339,109 @@ def build_argparser():
     parser.add_argument("--task_name",
                         type=str,
                         default="run",
-                        help="Name of the environment/task to run")
+                        help="Name of the environment/task to run (e.g. 'connect4', 'chess')")
 
     parser.add_argument("--mode",
                         type=str,
                         choices=["train", "test"],
                         default="train",
-                        help="Operating mode: 'train' for training, 'test' for evaluation")
+                        help="Operating mode: 'train' for training new model, 'test' for evaluating pre-trained model")
 
     parser.add_argument("--render_mode",
-                        choices=["gui", "text"],
+                        choices=["gui", "text", "none"],
                         default="gui",
-                        help="if gui, use pygame to show")
+                        help="Rendering mode: 'gui' for pygame visualization, 'text' for console output, 'none' for no rendering")
 
     parser.add_argument("--model_path",
                         type=str,
                         default=None,
-                        help="Path to load pre-trained model weights")
-    
+                        help="Path to load pre-trained model weights (required for test mode)")
+
     parser.add_argument("--lr",
                         type=float,
                         default=1e-3,
-                        help="")
+                        help="Learning rate for neural network optimizer (default: 0.001)")
 
-    parser.add_argument("--batch_size",                                                                           
-                        type=int,                                                                       
-                        default=512,                                                                     
-                        help="")
+    parser.add_argument("--batch_size",
+                        type=int,
+                        default=512,
+                        help="Training batch size for neural network updates (default: 512)")
 
     parser.add_argument("--train_epochs",
-                        type=int,  
-                        default=1, 
-                        help="")
+                        type=int,
+                        default=1,
+                        help="Number of training epochs per iteration (default: 1)")
 
     parser.add_argument("--n_total_games",
                         type=int,
                         default=1000000,
-                        help="")
+                        help="Total number of self-play games to generate during training (default: 1,000,000)")
 
     parser.add_argument("--n_parallel_games",
                         type=int,
                         default=125,
-                        help="")
+                        help="Number of games to run in parallel during self-play (default: 125)")
 
     parser.add_argument("--n_processes",
                         type=int,
                         default=8,
-                        help="")
+                        help="Number of parallel processes for self-play generation (default: 8)")
 
     parser.add_argument("--c_puct",
                         type=float,
                         default=2,
-                        help="")
- 
+                        help="Exploration constant in PUCT algorithm (controls exploration/exploitation trade-off)")
+
     parser.add_argument("--n_simulations",
                         type=int,
                         default=500,
-                        help="")
+                        help="Number of MCTS simulations per move during self-play (default: 500)")
 
     parser.add_argument("--device",
                         type=str,
+                        choices=["cpu", "cuda"],
                         default="cpu",
-                        help="Compute device: 'cpu' or 'cuda'")
+                        help="Compute device: 'cpu' or 'cuda' for GPU acceleration (default: cpu)")
 
     parser.add_argument("--save_path",
                         type=str,
                         default="model",
-                        help="Directory for saving model checkpoints")
+                        help="Directory for saving model checkpoints (default: 'model/')")
 
     parser.add_argument("--n_filters",
                         type=int,
                         default=256,
-                        help="")
+                        help="Number of filters in convolutional layers (default: 256)")
 
     parser.add_argument("--n_res_blocks",
                         type=int,
                         default=6,
-                        help="")
+                        help="Number of residual blocks in neural network (default: 6)")
 
     parser.add_argument("--hidden_size",
                         type=int,
                         default=256,
-                        help="")                 
+                        help="Size of hidden layers in neural network (default: 256)")
 
     parser.add_argument("--initial_exploration_moves",
                         type=int,
                         default=16,
-                        help="")
+                        help="Number of initial moves with forced exploration (default: 16)")
 
     parser.add_argument("--alpha",
                         type=float,
                         default=0.03,
-                        help="")
+                        help="Dirichlet noise parameter for root node exploration (default: 0.03)")
 
     parser.add_argument("--eps",
                         type=float,
                         default=0.25,
-                        help="")
+                        help="Weight of Dirichlet noise in root policy (default: 0.25)")
 
     parser.add_argument("--temperature",
                         type=float,
                         default=1,
-                        help="")
+                        help="Temperature parameter for move selection: 1.0=probabilistic, 0.0=greedy (default: 1)")
 
     return parser
 

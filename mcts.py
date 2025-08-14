@@ -11,7 +11,6 @@
 #■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■
 import numpy as np
 import torch
-from logger import logger
 
 class Node: 
     def __init__(self, env, c_puct, parent, idx, state, player, winner, is_terminal):
